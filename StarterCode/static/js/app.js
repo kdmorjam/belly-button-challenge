@@ -21,8 +21,6 @@ d3.json(url).then((sample) => {
 
 
 function displayData(default_sample, index, flag){
-    //display value of index
-    console.log(`Value of index: ${index}`);
     //get data for chart
     let chart_data = getChartData(default_sample.samples[index]);
     
@@ -33,14 +31,13 @@ function displayData(default_sample, index, flag){
     //plot bubble chart
     plotBubble(chart_data,flag);
     //print matadata for default
-    getSampleMeta(default_sample.metadata[index]);
+    getSampleMeta(default_sample.metadata[index], flag);
 
 }
 
 
 //get info for chart
 function getChartData(option_data){
-    console.log(`get chart data`);
     //we only need to top ten values
     let limit = 9; 
     //initailizing return variables
@@ -62,9 +59,8 @@ function getChartData(option_data){
 }
 
 
-//plot chart
+//plot OTU chart for sample id
 function plotOTU(chart_data, indicator){
-    console.log(`plotOTU`);
     //assigning variables for clarity
     let values = chart_data[0];         //sample_values
     let y_otulabel = chart_data[1];     //otu_ids prefaced with 'OTU'
@@ -89,17 +85,18 @@ function plotOTU(chart_data, indicator){
         }
     }
     if (indicator == -1){
-        Plotly.newPlot("bar",[trace],layout)
+        //create default plot
+        Plotly.newPlot("bar",[trace],layout);
     }
     else {
-        Plotly.restyle("bar",[trace])
+        //create updated plot
+        Plotly.react("bar",[trace],layout);
     };
 
 }
 
-//plot bubble chart  sample id
+//plot bubble chart for sample id
 function plotBubble(chart_data,indicator){
-    console.log(`plotBubble`);
      //assigning variables for clarity
      let values = chart_data[0];    //sample_values
      let otuids = chart_data[2];    //out_ids
@@ -116,17 +113,18 @@ function plotBubble(chart_data,indicator){
     };
 
     if (indicator == -1){
+        //create default plot
         Plotly.newPlot("bubble",[trace2]);
     }
     else{
-        Plotly.restyle("bubble",[trace2]);
+        //create updated plot
+        Plotly.react("bubble",[trace2]);
     }
     
 }
 
 //get sample-metadata for sample id
-function getSampleMeta(metadata){
-    console.log(`print Demography`);
+function getSampleMeta(metadata, indicator){
     //create list of keys & values from metadata
     let metakeys = Object.keys(metadata);
     let metavalues = Object.values(metadata);
@@ -135,6 +133,12 @@ function getSampleMeta(metadata){
     // Use D3 to select the sample-metadata id
     let meta = d3.select("#sample-metadata");
     
+    //if option changed, remove previous tags
+    if (indicator == 1) {
+        d3.selectAll("tr").remove();
+        d3.select("tbody").remove();
+    }
+
     // Append table body
     let table = meta.append("tbody");
     
@@ -146,7 +150,6 @@ function getSampleMeta(metadata){
 
 //display drop down list of sample IDs
 function displayOptions(sampleids){
-    console.log(`display options`);
     //use D3 to select the selDataset id 
     let listoptions = d3.select("#selDataset");
 
@@ -157,21 +160,17 @@ function displayOptions(sampleids){
 
 }
 
+//update charts and demography based on change selected
 function optionChanged(value){
-    console.log(`option changed`);
-    //value being passed is the sample id
-    console.log(`Value selected: ${value}`);
-
-    //get index position JSON using the names array
+    //get index position in JSON using the names array
     optionIndex = getIndex(value);
-    //display demograpy and charts for option selected
+    //display demography and charts for option selected
     displayData(optSample, optionIndex, 1);
 
 }
 
 //get index of position using names array
 function getIndex(optvalue){
-    let optIndex = optSample.names.indexOf(optvalue);
-    console.log(`Index found: ${optIndex}`);
-    return optIndex
+    //let optIndex = optSample.names.indexOf(optvalue);
+    return optSample.names.indexOf(optvalue)
 }
